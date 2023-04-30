@@ -74,7 +74,7 @@
 	        					<thead>
 	        						<th class="hidden"></th>
 	        						<th>Date</th>
-	        						<th>Transaction#</th>
+	        						<th>Transaction</th>
 	        						<th>Amount</th>
 	        						<th>Full Details</th>
 	        					</thead>

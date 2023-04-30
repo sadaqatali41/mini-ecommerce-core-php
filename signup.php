@@ -4,13 +4,6 @@
     header('location: cart_view.php');
   }
 
-  if(isset($_SESSION['captcha'])){
-    $now = time();
-    if($now >= $_SESSION['captcha']){
-      unset($_SESSION['captcha']);
-    }
-  }
-
 ?>
 <?php include 'includes/header.php'; ?>
 <body class="hold-transition register-page">
@@ -51,22 +44,17 @@
         		<span class="glyphicon glyphicon-envelope form-control-feedback"></span>
       		</div>
           <div class="form-group has-feedback">
+        		<input type="text" class="form-control" name="mobile" placeholder="Mobile" value="<?php echo (isset($_SESSION['mobile'])) ? $_SESSION['mobile'] : '' ?>" required>
+        		<span class="glyphicon glyphicon-earphone form-control-feedback"></span>
+      		</div>
+          <div class="form-group has-feedback">
             <input type="password" class="form-control" name="password" placeholder="Password" required>
             <span class="glyphicon glyphicon-lock form-control-feedback"></span>
           </div>
           <div class="form-group has-feedback">
             <input type="password" class="form-control" name="repassword" placeholder="Retype password" required>
             <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
-          </div>
-          <?php
-            // if(!isset($_SESSION['captcha'])){
-            //   echo '
-            //     <di class="form-group" style="width:100%;">
-            //       <div class="g-recaptcha" data-sitekey="6LevO1IUAAAAAFX5PpmtEoCxwae-I8cCQrbhTfM6"></div>
-            //     </di>
-            //   ';
-            // }
-          ?>
+          </div>          
           <hr>
       		<div class="row">
     			<div class="col-xs-4">

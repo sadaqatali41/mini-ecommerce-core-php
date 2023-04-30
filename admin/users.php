@@ -56,8 +56,8 @@
                   <th>Email</th>
                   <th>Name</th>
                   <th>Status</th>
-                  <th>Date Added</th>
-                  <th>Tools</th>
+                  <th>Date</th>
+                  <th>Manage</th>
                 </thead>
                 <tbody>
                   <?php

@@ -27,18 +27,44 @@
 							</table>
 	        			</div>
 	        		</div>
-	        		<?php
-	        			if(isset($_SESSION['user'])){
-	        				echo "
-	        					<div id='paypal-button'></div>
-	        				";
-	        			}
-	        			else {
-	        				echo "
-	        					<h4>You need to <a href='login.php'>Login</a> to checkout.</h4>
-	        				";
-	        			}
-	        		?>
+	        		<?php if(isset($_SESSION['user'])) : ?>
+						<button type="button" class="btn btn-info" data-toggle="modal" data-target="#billingModal">Checkout</button>
+						<div id="billingModal" class="modal fade" role="dialog">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal">&times;</button>
+										<h4 class="modal-title">Billing Address</h4>
+									</div>
+									<div class="modal-body">
+										<form id="billingForm">
+											<div class="form-group">
+												<label for="address">Address</label>
+												<input type="text" name="address" class="form-control" autocomplete="off" placeholder="Address">
+											</div>
+											<div class="form-group">
+												<label for="city">Town/City</label>
+												<input type="text" name="city" class="form-control" autocomplete="off" placeholder="Town/City">
+											</div>
+											<div class="form-group">
+												<label for="state">State</label>
+												<input type="text" name="state" class="form-control" autocomplete="off" placeholder="State">
+											</div>
+											<div class="form-group">
+												<label for="pincode">Pin Code</label>
+												<input type="text" name="pincode" class="form-control" autocomplete="off" placeholder="Pin Code">
+											</div>
+											<div class="form-group">
+												<button type="submit" class="btn btn-primary" id="billingFormBtn">Pay Now</button>
+											</div>
+										</form>
+									</div>									
+								</div>
+							</div>
+						</div>
+					<?php else : ?>
+						<h4>You need to <a href='login.php'>Login</a> to checkout.</h4>
+	        		<?php endif; ?>
 	        	</div>
 	        </div>
 	      </section>	     
@@ -63,8 +89,8 @@ $(function(){
 			success: function(response){
 				if(!response.error){
 					getDetails();
-					getCart();
-					getTotal();
+					getCart();	
+					getTotal();				
 				}
 			}
 		});
@@ -123,6 +149,29 @@ $(function(){
 	getDetails();
 	getTotal();
 
+	$(document).on('submit', '#billingForm', function(){
+		$('#billingFormBtn').attr('disabled', true);
+		$('#billingFormBtn').text('Loading..');
+
+		$.post('sales.php', $(this).serialize(), function(res){
+			var data = JSON.parse(res);
+			if(data['status'] === 'error') {
+				var errors = '';
+				$.each(data['error'], function(i, v){
+					errors += v + "\r\n";
+				});
+				alert(errors);
+				$('#billingFormBtn').attr('disabled', false);
+				$('#billingFormBtn').text('Pay Now');
+			}
+			if(data['status'] === 'success') {
+				alert(data['message']);
+				window.location.href = 'profile.php';
+			}
+		});
+		return false;
+	});
+
 });
 
 function getDetails(){
@@ -143,53 +192,14 @@ function getTotal(){
 		url: 'cart_total.php',
 		dataType: 'json',
 		success:function(response){
-			total = response;
-
-			if(total > 0 ) {
-				paypal.Button.render({
-					env: 'sandbox', // change for production if app is live,
-				
-					client: {
-						sandbox:    'ASb1ZbVxG5ZFzCWLdYLi_d1-k5rmSjvBZhxP2etCxBKXaJHxPba13JJD_D3dTNriRbAv3Kp_72cgDvaZ',
-						//production: 'AaBHKJFEej4V6yaArjzSx9cuf-UYesQYKqynQVCdBlKuZKawDDzFyuQdidPOBSGEhWaNQnnvfzuFB9SM'
-					},
-				
-					commit: true, // Show a 'Pay Now' button
-				
-					style: {
-						color: 'gold',
-						size: 'small'
-					},
-				
-					payment: function(data, actions) {
-						return actions.payment.create({
-							payment: {
-								transactions: [
-									{
-										//total purchase
-										amount: { 
-											total: total, 
-											currency: 'USD' 
-										}
-									}
-								]
-							}
-						});
-					},
-				
-					onAuthorize: function(data, actions) {
-						return actions.payment.execute().then(function(payment) {
-							window.location = 'sales.php?pay='+payment.id;
-						});
-					},
-				
-				}, '#paypal-button');
+			if(response > 0 ) {
+				$('[data-target="#billingModal"]').show();
+			} else {
+				$('[data-target="#billingModal"]').hide();
 			}
-
 		}
 	});
 }
 </script>
-<!-- Paypal Express -->
 </body>
 </html>
